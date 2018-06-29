@@ -1,14 +1,14 @@
 {
-  "name": "eth-simple-keyring",
+  "name": "eth-gnosis-safe-keyring",
   "version": "1.2.2",
-  "description": "A simple standard interface for a series of Ethereum private keys.",
+  "description": "A gnosis-safe standard interface for a series of Ethereum private keys.",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/MetaMask/eth-simple-keyring.git"
+    "url": "git+ssh://git@github.com/MetaMask/eth-gnosis-safe-keyring.git"
   },
   "keywords": [
     "ethereum",
@@ -17,14 +17,16 @@
   "author": "Dan Finlay",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/MetaMask/eth-simple-keyring/issues"
+    "url": "https://github.com/MetaMask/eth-gnosis-safe-keyring/issues"
   },
-  "homepage": "https://github.com/MetaMask/eth-simple-keyring#readme",
+  "homepage": "https://github.com/MetaMask/eth-gnosis-safe-keyring#readme",
   "dependencies": {
     "eth-sig-util": "^1.4.2",
+    "eth-simple-keyring": "^1.2.2",
     "ethereumjs-util": "^5.1.1",
     "ethereumjs-wallet": "^0.6.0",
     "events": "^1.1.1",
+    "truffle-contract": "^3.0.6",
     "xtend": "^4.0.1"
   },
   "devDependencies": {

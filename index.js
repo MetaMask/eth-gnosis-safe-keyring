@@ -1,17 +1,13 @@
-const EventEmitter = require('events').EventEmitter
-const Wallet = require('ethereumjs-wallet')
-const ethUtil = require('ethereumjs-util')
-const type = 'Simple Key Pair'
-const sigUtil = require('eth-sig-util')
+const Contract = require('truffle-contract')
+const GnosisSafe = require('./contracts/GnosisSafe.json')
+const SimpleKeyring = require('eth-simple-keyring')
+const type = 'GNOSIS_SAFE_KEYRING'
 
-class SimpleKeyring extends EventEmitter {
-
-  /* PUBLIC METHODS */
+class GnosisSafeKeyring extends SimpleKeyring {
 
   constructor (opts) {
     super()
     this.type = type
-    this.wallets = []
     this.deserialize(opts)
   }
 
@@ -19,20 +15,9 @@ class SimpleKeyring extends EventEmitter {
     return Promise.resolve(this.wallets.map(w => w.getPrivateKey().toString('hex')))
   }
 
-  deserialize (privateKeys = []) {
-    return new Promise((resolve, reject) => {
-      try {
-        this.wallets = privateKeys.map((privateKey) => {
-          const stripped = ethUtil.stripHexPrefix(privateKey)
-          const buffer = new Buffer(stripped, 'hex')
-          const wallet = Wallet.fromPrivateKey(buffer)
-          return wallet
-        })
-      } catch (e) {
-        reject(e)
-      }
-      resolve()
-    })
+  deserialize ({ provider } = opts) {
+    this.contract = Contract(GnosisSafe)
+    this.contract.setProvider(provider)
   }
 
   addAccounts (n = 1) {
@@ -90,17 +75,8 @@ class SimpleKeyring extends EventEmitter {
     return Promise.resolve(wallet.getPrivateKey().toString('hex'))
   }
 
-
-  /* PRIVATE METHODS */
-
-  _getWalletForAccount (account) {
-    const address = sigUtil.normalize(account)
-    let wallet = this.wallets.find(w => ethUtil.bufferToHex(w.getAddress()) === address)
-    if (!wallet) throw new Error('Simple Keyring - Unable to find matching address.')
-    return wallet
-  }
-
 }
 
-SimpleKeyring.type = type
-module.exports = SimpleKeyring
+GnosisSafeKeyring.type = type
+module.exports = GnosisSafeKeyring
+
