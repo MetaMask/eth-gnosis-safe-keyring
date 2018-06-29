@@ -1,8 +1,8 @@
-# Simple Keyring [![CircleCI](https://circleci.com/gh/MetaMask/eth-simple-keyring.svg?style=svg)](https://circleci.com/gh/MetaMask/eth-simple-keyring)
+# Gnosis Safe Keyring [![CircleCI](https://circleci.com/gh/MetaMask/eth-gnosis-safe-keyring.svg?style=svg)](https://circleci.com/gh/MetaMask/eth-gnosis-safe-keyring)
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/MetaMask/eth-simple-keyring.svg)](https://greenkeeper.io/)
+[![Greenkeeper badge](https://badges.greenkeeper.io/MetaMask/eth-gnosis-safe-keyring.svg)](https://greenkeeper.io/)
 
-A simple JS class wrapped around [ethereumjs-wallet](https://github.com/ethereumjs/ethereumjs-wallet) designed to expose an interface common to many different signing strategies to be used in a `KeyringController`; such as the one used in [MetaMask](https://metamask.io/)
+A gnosis-safe JS class wrapped around [ethereumjs-wallet](https://github.com/ethereumjs/ethereumjs-wallet) designed to expose an interface common to many different signing strategies to be used in a `KeyringController`; such as the one used in [MetaMask](https://metamask.io/)
 
 ## The Keyring Class Protocol
 
@@ -51,7 +51,7 @@ When this method is called, you must return an array of hex-string addresses for
 
 This method will receive a hex-prefixed, all-lowercase address string for the account you should sign the incoming transaction with.
 
-For your convenience, the transaction is an instance of ethereumjs-tx, (https://github.com/ethereumjs/ethereumjs-tx) so signing can be as simple as:
+For your convenience, the transaction is an instance of ethereumjs-tx, (https://github.com/ethereumjs/ethereumjs-tx) so signing can be as gnosis-safe as:
 
 ```
 transaction.sign(privateKey)
