@@ -1,7 +1,8 @@
 const Contract = require('truffle-contract')
 const GnosisSafe = require('./contracts/GnosisSafe.json')
+const Proxy = require('./contracts/Proxy.json')
 const SimpleKeyring = require('eth-simple-keyring')
-const type = 'GNOSIS_SAFE_KEYRING'
+const type = 'Gnosis Safe Keyring'
 
 class GnosisSafeKeyring extends SimpleKeyring {
 

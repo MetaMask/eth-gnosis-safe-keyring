@@ -1,9 +1,12 @@
 const assert = require('assert')
 const ethUtil = require('ethereumjs-util')
-const sigUtil = require('eth-sig-util')
-const SimpleKeyring = require('../')
+const Ganache = require('ganache-core')
+const GnosisSafeKeyring = require('../')
+const GnosisSafe = require('../contracts/GnosisSafe.json')
+const Contract = require('truffle-contract')
+const Eth = require('ethjs')
 
-const TYPE_STR = 'Simple Key Pair'
+const TYPE_STR = 'Gnosis Safe Keyring'
 
 // Sample account:
 const testAccount = {
@@ -11,16 +14,32 @@ const testAccount = {
   address: '0x01560cd3bac62cc6d7e6380600d9317363400896',
 }
 
-describe('simple-keyring', () => {
+describe('gnosis-safe-keyring', () => {
 
-  let keyring
-  beforeEach(() => {
-    keyring = new SimpleKeyring()
+  let keyring, provider, Safe, safe, accounts, account, eth
+  beforeEach(async () => {
+    Safe = Contract(GnosisSafe)
+
+    provider = Ganache.provider()
+    Safe.setProvider(provider)
+    eth = new Eth(provider)
+
+    accounts = await eth.accounts()
+    account = accounts[0]
+
+    Safe.defaults({
+      from: account,
+      gasPrice: '0xfffffffff',
+      gas: '0xfffffe',
+    })
+
+    const safe = await Safe.new(accounts, 1, 0, 0)
   })
 
   describe('Keyring.type', () => {
     it('is a class property that returns the type string.', () => {
-      const type = SimpleKeyring.type
+      console.dir(GnosisSafeKeyring)
+      const type = GnosisSafeKeyring.type
       assert.equal(type, TYPE_STR)
     })
   })
@@ -32,6 +51,7 @@ describe('simple-keyring', () => {
     })
   })
 
+  /*
   describe('#serialize empty wallets.', () => {
     it('serializes an empty array', async () => {
       const output = await keyring.serialize()
@@ -52,7 +72,7 @@ describe('simple-keyring', () => {
 
   describe('#constructor with a private key', () => {
     it('has the correct addresses', async () => {
-      const keyring = new SimpleKeyring([testAccount.key])
+      const keyring = new GnosisSafeKeyring([testAccount.key])
       const accounts = await keyring.getAccounts()
       assert.deepEqual(accounts, [testAccount.address], 'accounts match expected')
     })
@@ -171,4 +191,5 @@ describe('simple-keyring', () => {
       assert.equal(restored, address, 'recovered address')
     })
   })
+  */
 })
