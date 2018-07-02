@@ -9,6 +9,7 @@ class GnosisSafeKeyring extends SimpleKeyring {
   constructor (opts) {
     super()
     this.type = type
+    console.log('Opts', opts)
     this.deserialize(opts)
   }
 

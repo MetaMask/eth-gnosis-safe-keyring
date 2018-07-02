@@ -29,8 +29,8 @@ describe('gnosis-safe-keyring', () => {
 
     Safe.defaults({
       from: account,
-      gasPrice: '0xfffffffff',
-      gas: '0xfffffe',
+      gasPrice: '0xf',
+      gas: 6000000,
     })
 
     const safe = await Safe.new(accounts, 1, 0, 0)
@@ -38,7 +38,6 @@ describe('gnosis-safe-keyring', () => {
 
   describe('Keyring.type', () => {
     it('is a class property that returns the type string.', () => {
-      console.dir(GnosisSafeKeyring)
       const type = GnosisSafeKeyring.type
       assert.equal(type, TYPE_STR)
     })
@@ -46,6 +45,9 @@ describe('gnosis-safe-keyring', () => {
 
   describe('#type', () => {
     it('returns the correct value', () => {
+      const keyring = new GnosisSafeKeyring({
+        provider,
+      })
       const type = keyring.type
       assert.equal(type, TYPE_STR)
     })
