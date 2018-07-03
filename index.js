@@ -7,9 +7,8 @@ const type = 'Gnosis Safe Keyring'
 class GnosisSafeKeyring extends SimpleKeyring {
 
   constructor (opts) {
-    super()
+    super(opts)
     this.type = type
-    console.log('Opts', opts)
     this.deserialize(opts)
   }
 
@@ -17,7 +16,7 @@ class GnosisSafeKeyring extends SimpleKeyring {
     return Promise.resolve(this.wallets.map(w => w.getPrivateKey().toString('hex')))
   }
 
-  deserialize ({ provider } = opts) {
+  deserialize ({ provider }) {
     this.contract = Contract(GnosisSafe)
     this.contract.setProvider(provider)
   }
