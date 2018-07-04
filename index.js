@@ -14,12 +14,13 @@ class GnosisSafeKeyring {
     return Promise.resolve(this.wallets.map(w => w.getPrivateKey().toString('hex')))
   }
 
-  deserialize ({ provider, owner, safeAddress, threshold }) {
+  deserialize ({ provider, owner, ownerAddress, safeAddress, threshold }) {
     this.GnosisSafeContract = Contract(GnosisSafe)
     this.GnosisSafeContract.setProvider(provider)
     this.safe = this.GnosisSafeContract.at(safeAddress)
     this.threshold = threshold
     this.owner = owner
+    this.ownerAddress = ownerAddress
   }
 
   addAccounts (n = 1) {
@@ -38,7 +39,19 @@ class GnosisSafeKeyring {
 
   // tx is an instance of the ethereumjs-transaction class.
   signTransaction (address, tx) {
-    const wallet = this._getWalletForAccount(address)
+    if (address !== this.safe.address) {
+      throw new Error('GnosisSafeKeyring can only send from its own address')
+    }
+
+    console.dir(tx)
+    console.dir({
+      nonce: tx.nonce,
+      value: tx.value,
+    })
+
+
+
+    return this.owner.signTransaction(this.ownerAddress, tx)
     var privKey = wallet.getPrivateKey()
     tx.sign(privKey)
     return Promise.resolve(tx)

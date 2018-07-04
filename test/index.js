@@ -1,10 +1,13 @@
 const assert = require('assert')
 const ethUtil = require('ethereumjs-util')
+const BN = ethUtil.BN
+const sigUtil = require('eth-sig-util')
 const Ganache = require('ganache-core')
 const GnosisSafeKeyring = require('../')
 const SimpleKeyring = require('eth-simple-keyring')
 const GnosisSafe = require('../contracts/GnosisSafe.json')
 const Contract = require('truffle-contract')
+const EthereumTx = require('ethereumjs-tx')
 const Eth = require('ethjs')
 let eth, provider
 
@@ -85,16 +88,31 @@ describe('gnosis-safe-keyring', () => {
       const safeKeyring = new GnosisSafeKeyring({
         provider,
         owner: keyring, // Passing one keyring to this one as owner.
+        ownerAddress: testAccount.address,
         safeAddress: safe.address,
         threshold: threshold.toNumber(10),
       })
 
+      const nonce = await eth.getTransactionCount(testAccount.address)
+      console.dir({ nonce })
       const sendOutOpts = {
         from: safe.address,
-        to: testAccount,
-        value: 5e17.toString(),
+        to: testAccount.address,
+        value: 5e17.toString(16),
         data: undefined,
+        nonce: '0x' + nonce.add(new BN(1)).toString(16),
+        gasPrice: '0x09184e72a000',
+        gasLimit: '0x2710',
       }
+
+      const ethTx = new EthereumTx(sendOutOpts)
+
+      const signed = await safeKeyring.signTransaction(safe.address, ethTx)
+      console.dir(signed)
+      let hash = await eth.sendRawTransaction(signed.serialize().toString('hex'))
+      await waitForTx(hash)
+
+      let finalBalance = await eth.getBalance(safe.address)
 
     })
   })
