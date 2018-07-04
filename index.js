@@ -1,13 +1,11 @@
 const Contract = require('truffle-contract')
 const GnosisSafe = require('./contracts/GnosisSafe.json')
 const Proxy = require('./contracts/Proxy.json')
-const SimpleKeyring = require('eth-simple-keyring')
 const type = 'Gnosis Safe Keyring'
 
-class GnosisSafeKeyring extends SimpleKeyring {
+class GnosisSafeKeyring {
 
   constructor (opts) {
-    super(opts)
     this.type = type
     this.deserialize(opts)
   }
@@ -16,9 +14,12 @@ class GnosisSafeKeyring extends SimpleKeyring {
     return Promise.resolve(this.wallets.map(w => w.getPrivateKey().toString('hex')))
   }
 
-  deserialize ({ provider }) {
-    this.contract = Contract(GnosisSafe)
-    this.contract.setProvider(provider)
+  deserialize ({ provider, owner, safeAddress, threshold }) {
+    this.GnosisSafeContract = Contract(GnosisSafe)
+    this.GnosisSafeContract.setProvider(provider)
+    this.safe = this.GnosisSafeContract.at(safeAddress)
+    this.threshold = threshold
+    this.owner = owner
   }
 
   addAccounts (n = 1) {

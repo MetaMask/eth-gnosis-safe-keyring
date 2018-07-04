@@ -2,30 +2,35 @@ const assert = require('assert')
 const ethUtil = require('ethereumjs-util')
 const Ganache = require('ganache-core')
 const GnosisSafeKeyring = require('../')
+const SimpleKeyring = require('eth-simple-keyring')
 const GnosisSafe = require('../contracts/GnosisSafe.json')
 const Contract = require('truffle-contract')
 const Eth = require('ethjs')
+let eth, provider
 
 const TYPE_STR = 'Gnosis Safe Keyring'
 
 // Sample account:
 const testAccount = {
-  key: '0xb8a9c05beeedb25df85f8d641538cbffedf67216048de9c678ee26260eb91952',
+  secretKey: '0xb8a9c05beeedb25df85f8d641538cbffedf67216048de9c678ee26260eb91952',
   address: '0x01560cd3bac62cc6d7e6380600d9317363400896',
+  balance: 1e20.toString(),
 }
 
 describe('gnosis-safe-keyring', () => {
 
-  let keyring, provider, Safe, safe, accounts, account, eth
+  let keyring, Safe, safe, accounts, account, safeKeyring, threshold
   beforeEach(async () => {
     Safe = Contract(GnosisSafe)
 
-    provider = Ganache.provider()
+    provider = Ganache.provider({ accounts: [testAccount] })
     Safe.setProvider(provider)
     eth = new Eth(provider)
 
     accounts = await eth.accounts()
     account = accounts[0]
+
+    keyring = new SimpleKeyring([ testAccount.secretKey ])
 
     Safe.defaults({
       from: account,
@@ -33,7 +38,8 @@ describe('gnosis-safe-keyring', () => {
       gas: 6000000,
     })
 
-    const safe = await Safe.new(accounts, 1, 0, 0)
+    safe = await Safe.new([ testAccount.address ], 1, 0, 0)
+    threshold = await safe.threshold()
   })
 
   describe('Keyring.type', () => {
@@ -45,11 +51,51 @@ describe('gnosis-safe-keyring', () => {
 
   describe('#type', () => {
     it('returns the correct value', () => {
-      const keyring = new GnosisSafeKeyring({
+      const safeKeyring = new GnosisSafeKeyring({
         provider,
+        owner: keyring, // Passing one keyring to this one as owner.
+        safeAddress: safe.address,
+        threshold: threshold.toNumber(10),
       })
-      const type = keyring.type
+      const type = safeKeyring.type
       assert.equal(type, TYPE_STR)
+    })
+  })
+
+  describe('#signTransaction', () => {
+    it('signs a valid transaction and moves ether around', async () => {
+
+      // Send 1 ether to the wallet:
+      const txOpts = {
+        from: testAccount.address,
+        to: safe.address,
+        value: 1e18.toString(),
+        data: undefined,
+      }
+      const txHash = await eth.sendTransaction(txOpts)
+      const tx = await waitForTx(txHash)
+
+      const owners = await safe.getOwners()
+      owners.forEach((owner) => {
+        assert.ok(accounts.includes(owner), 'owner correctly registered')
+      })
+
+      const keyring = new SimpleKeyring([ testAccount.secretKey ])
+
+      const safeKeyring = new GnosisSafeKeyring({
+        provider,
+        owner: keyring, // Passing one keyring to this one as owner.
+        safeAddress: safe.address,
+        threshold: threshold.toNumber(10),
+      })
+
+      const sendOutOpts = {
+        from: safe.address,
+        to: testAccount,
+        value: 5e17.toString(),
+        data: undefined,
+      }
+
     })
   })
 
@@ -195,3 +241,14 @@ describe('gnosis-safe-keyring', () => {
   })
   */
 })
+
+async function waitForTx (txHash) {
+  let mined = false
+  let tx
+  while (!mined) {
+    tx = await eth.getTransactionByHash(txHash)
+    mined = !!tx
+  }
+  return tx
+}
+
